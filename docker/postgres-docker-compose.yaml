@@ -3,11 +3,11 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16.2  # Specify the desired version here
-    container_name: my-postgres-db
+    container_name: postgres-db
     environment:
-      POSTGRES_DB: movie-ticket_database
-      POSTGRES_USER: iamgovindthakur
-      POSTGRES_PASSWORD: iamgovindthakur
+      POSTGRES_DB: postgres
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
     volumes:

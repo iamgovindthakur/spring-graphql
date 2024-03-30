@@ -1,41 +1,62 @@
 package com.iamgkt.spring.graphql.controller;
 
+import com.iamgkt.spring.graphql.dto.OrderDto;
+import com.iamgkt.spring.graphql.dto.UserDto;
+import com.iamgkt.spring.graphql.entity.Order;
 import com.iamgkt.spring.graphql.entity.User;
+import com.iamgkt.spring.graphql.services.OrderService;
 import com.iamgkt.spring.graphql.services.UserService;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
-public class UserController {
+public class OrderController {
+  private final OrderService orderService;
   private final UserService userService;
+  private final ModelMapper modelMapper;
 
-  private static User buildUser(String name, String email, String password) {
-    return User.builder().name(name).email(email).password(password).build();
+  private static Order buildOrder(String orderDetail, String address, BigDecimal price, User user) {
+    return Order.builder()
+        .orderDetail(orderDetail)
+        .address(address)
+        .price(price)
+        .user(user)
+        .created_at(LocalDateTime.now())
+        .build();
   }
 
   @MutationMapping
-  public User createUser(@Argument String name, @Argument String email, @Argument String password) {
-    return userService.createUser(buildUser(name, email, password));
+  public Order createOrder(
+      @Argument String orderDetail,
+      @Argument String address,
+      @Argument BigDecimal price,
+      @Argument long userId) {
+
+    UserDto fetchedUserById = userService.findUserById(userId);
+    User user = modelMapper.map(fetchedUserById, User.class);
+    return orderService.createOrder(buildOrder(orderDetail, address, price, user));
   }
 
   @QueryMapping
-  public User getUser(@Argument long id) {
-    return userService.findUserById(id);
+  public OrderDto getOrder(@Argument long id) {
+    return orderService.findOrderById(id);
   }
 
   @QueryMapping
-  public List<User> getUsers() {
-    return userService.getAllUser();
+  public List<OrderDto> getOrders() {
+    return orderService.findAllOrder();
   }
 
   @MutationMapping
-  public boolean deleteUser(@Argument long id) {
-    return userService.deleteUserById(id);
+  public boolean deleteOrder(@Argument long id) {
+    return orderService.deleteOrderById(id);
   }
 }
